@@ -1,0 +1,372 @@
+                                                                  Задача №6
+// Вопрос:
+//
+//     📜 Описание:
+//
+//     При нажатии на кнопку "Изменить title" title должен обновиться,
+//
+//     но из-за невнимательности была допущена ошибка и изменение не происходит
+//
+// Найдите и исправьте ошибку
+//
+// Исправленную версию строки напишите в качестве ответа.
+//
+//
+//
+// import axios from "axios"
+// import { createRoot } from "react-dom/client"
+// import { useEffect, useState } from "react"
+// // Types
+// type Photo = {
+//   albumId: string
+//   id: string
+//   title: string
+//   url: string
+// }
+// type Payload = {
+//   title: string
+//   url?: string
+// }
+// // Api
+// const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" })
+// const photoId = "637df6dc99fdc52af974a517"
+// const photosAPI = {
+//   getPhoto() {
+//     return instance.get<Photo>(`photos/${photoId}`)
+//   },
+//   updatePhoto(payload: Payload) {
+//     return instance.put<Photo>(`photos/${photoId}`, payload)
+//   },
+// }
+// App
+// export const App = () => {
+//   const [photo, setPhoto] = useState<Photo | null>(null)
+//   useEffect(() => {
+//     photosAPI.getPhoto().then((res) => {
+//       setPhoto(res.data)
+//     })
+//   }, [])
+//   const updatePhotoHandler = () => {
+//     // ❗ title и url указаны в качестве заглушки. Server сам сгенерирует новый title
+//     const payload = {
+//       title: "Новый title",
+//       url: "data:image/png;base64,iVBORw0FAKEADDRESSnwMZAABJRUrkJggg==",
+//     }
+//     photosAPI.updatePhoto(payload).then((res) => {
+//       setPhoto(res.data)
+//     })
+//   }
+//   return (
+//     <>
+//       <h1>📸 Фото</h1>
+//       <div>
+//         <div style={{ marginBottom: "15px" }}>
+//           <h1>title: {photo?.title}</h1>
+//           <div>
+//             <img src={photo?.url} alt="" />
+//           </div>
+//         </div>
+//         <button style={{ marginLeft: "15px" }} onClick={updatePhotoHandler}>
+//           Изменить title
+//         </button>
+//       </div>
+//     </>
+//   )
+// }
+// createRoot(document.getElementById("root")!).render(<App />)
+
+
+//Правильный ответ: return instance.put<Photo>(`photos/${photoId}`, payload)
+
+
+
+                                                              Задача №5
+// Вопрос:
+//
+//     📜 Описание:
+//
+//     Напишите запрос на сервер для создания нового комментария.
+//
+//     Типизацию возвращаемых данных в ответе указывать необязательно, но можно и указать (в ответах учтены оба варианта).
+//
+// Исправленную версию строки напишите в качестве ответа.
+//
+//
+//
+// import axios from "axios"
+// import { createRoot } from "react-dom/client"
+// import { useEffect, useState } from "react"
+// // Types
+// type Comment = {
+//   postId: string
+//   id: string
+//   name: string
+//   email: string
+//   body: string
+// }
+// // Api
+// const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" })
+// const commentsAPI = {
+//   getComments() {
+//     return instance.get<Comment[]>("comments")
+//   },
+//   createComment() {
+//     const payload = {
+//       body: "Это просто заглушка. Backend сам сгенерирует новый комментарий и вернет его вам",
+//     }
+//     return instance.post("comments", payload)
+//     // Promise.resolve() стоит в качестве заглушки, чтобы TS не ругался и код компилировался
+//     // Promise.resolve() нужно удалить и написать правильный запрос для создания нового комментария
+//     // return Promise.resolve()
+//   },
+// }
+// // App
+// export const App = () => {
+//   const [comments, setComments] = useState<Comment[]>([])
+//   useEffect(() => {
+//     commentsAPI.getComments().then((res) => {
+//       setComments(res.data)
+//     })
+//   }, [])
+//   const createPostHandler = () => {
+//     commentsAPI.createComment().then((res: any) => {
+//       const newComment = res.data
+//       setComments([newComment, ...comments])
+//     })
+//   }
+//   return (
+//     <>
+//       <h1>📝 Список комментариев</h1>
+//       <div style={{ marginBottom: "15px" }}>
+//         <button style={{ marginLeft: "15px" }} onClick={() => createPostHandler()}>
+//           Добавить новый комментарий
+//         </button>
+//       </div>
+//       {comments.map((c) => {
+//         return (
+//           <div key={c.id}>
+//             <b>Comment</b>: {c.body}{" "}
+//           </div>
+//         )
+//       })}
+//     </>
+//   )
+// }
+// createRoot(document.getElementById("root")!).render(<App />)
+
+//Правильный ответ: return instance.post("comments", payload)
+
+
+
+                                                                     Задача №3
+// Вопрос:
+//
+//     📜 Описание:
+//
+//     При нажатии на кнопку Increase Temp температура не увеличивается 🥲
+//
+// 🪛 Задача:
+//
+//     Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Increase Temp, температура увеличивалась на 1 градус.
+//
+//     В качестве ответа укажите исправленную строку кода.
+//
+// ❗Изменение стейта должно быть написано мутабельным образом
+//
+//
+//
+// import { configureStore, createSlice } from "@reduxjs/toolkit"
+// import { createRoot } from "react-dom/client"
+// import { Provider, useDispatch, useSelector } from "react-redux"
+// // slice
+// const slice = createSlice({
+//   name: "temperature",
+//   initialState: {
+//     celsius: 20,
+//   },
+//   reducers: {
+//     increase: (state) => {
+//       state.celsius += 1
+//     },
+//   },
+//   selectors: {
+//     selectCelsius: (state) => state.celsius,
+//   },
+// })
+// const { increase } = slice.actions
+// const { selectCelsius } = slice.selectors
+// // App.tsx
+// const App = () => {
+//   const temp = useAppSelector(selectCelsius)
+//   const dispatch = useAppDispatch()
+//   return (
+//     <>
+//       <button onClick={() => dispatch(increase())}>Increase Temp</button>
+//       <span>{temp}°C</span>
+//     </>
+//   )
+// }
+// // store.ts
+// const store = configureStore({
+//   reducer: {
+//     temperature: slice.reducer,
+//   },
+// })
+// type RootState = ReturnType<typeof store.getState>
+// type AppDispatch = typeof store.dispatch
+// const useAppDispatch = useDispatch.withTypes<AppDispatch>()
+// const useAppSelector = useSelector.withTypes<RootState>()
+// // main.ts
+// createRoot(document.getElementById("root")!).render(
+//   <Provider store={store}>
+//     <App />
+//   </Provider>,
+// )
+               //Правильный ответ: state.celsius += 1
+
+
+
+                                                           Задача №2
+// Вопрос:
+//
+//     📜 Описание:
+//
+//     При нажатии на кнопку Add Fruit, новый фрукт не добавляется в корзину 🥲
+//
+// 🪛 Задача:
+//
+//     Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Add Fruit, новый фрукт добавлялся в корзину
+//
+// В качестве ответа укажите исправленную строку кода.
+//
+// ❗Изменение стейта должно быть написано мутабельным образом
+//
+//
+//
+// import { configureStore, createSlice, nanoid } from "@reduxjs/toolkit"
+// import { createRoot } from "react-dom/client"
+// import { Provider, useDispatch, useSelector } from "react-redux"
+// // slice
+// const slice = createSlice({
+//   name: "fruits",
+//   initialState: {
+//     basket: [
+//       { id: 1, name: "Apple" },
+//       { id: 2, name: "Banana" },
+//     ],
+//   },
+//   reducers: {
+//     addFruit: (state, action) => {
+//       state.basket.push(action.payload)
+//     },
+//   },
+//   selectors: {
+//     selectBasket: (state) => state.basket,
+//   },
+// })
+// const { addFruit } = slice.actions
+// const { selectBasket } = slice.selectors
+// // App.tsx
+// const App = () => {
+//   const fruits = useAppSelector(selectBasket)
+//   const dispatch = useAppDispatch()
+//   const addNewFruit = () => {
+//     const newFruit = { id: nanoid(), name: "Orange" }
+//     dispatch(addFruit(newFruit))
+//   }
+//   return (
+//     <>
+//       <button onClick={addNewFruit}>Add Fruit</button>
+//       <ul>
+//         {fruits.map((fruit) => (
+//           <li key={fruit.id}>{fruit.name}</li>
+//         ))}
+//       </ul>
+//     </>
+//   )
+// }
+// // store.ts
+// const store = configureStore({
+//   reducer: {
+//     fruits: slice.reducer,
+//   },
+// })
+// type RootState = ReturnType<typeof store.getState>
+// type AppDispatch = typeof store.dispatch
+// const useAppDispatch = useDispatch.withTypes<AppDispatch>()
+// const useAppSelector = useSelector.withTypes<RootState>()
+// // main.ts
+// createRoot(document.getElementById("root")!).render(
+//   <Provider store={store}>
+//     <App />
+//   </Provider>,
+// )
+               Правильный ответ: state.basket.push(action.payload)
+
+
+
+
+                                                                Задача №1
+// Вопрос:
+//
+//     📜 Описание:
+//
+//     Почему не удаляется post при нажатии на кнопку удаления (х) ?
+//
+//     Найдите ошибку и вставьте исправленную строку кода в качестве ответа
+//
+//
+//
+// import axios from "axios"
+// import { createRoot } from "react-dom/client"
+// import { useEffect, useState } from "react"
+// // Types
+// type Post = {
+//   body: string
+//   id: string
+//   title: string
+//   userId: string
+// }
+// // Api
+// const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" })
+// const postsAPI = {
+//   getPosts() {
+//     return instance.get<Post[]>("posts")
+//   },
+//   deletePost(id: string) {
+//     return instance.delete<{ message: string }>(`posts/${id}`)
+//   },
+// }
+// // App
+// export const App = () => {
+//   const [posts, setPosts] = useState<Post[]>([])
+//   useEffect(() => {
+//     postsAPI.getPosts().then((res) => {
+//       setPosts(res.data)
+//     })
+//   }, [])
+//   const deletePostHandler = (id: string) => {
+//     postsAPI.deletePost(id).then((res) => {
+//       const newPostsArr = posts.filter((p) => p.id !== id)
+//       setPosts(newPostsArr)
+//     })
+//   }
+//   return (
+//     <>
+//       <h1>📜 Список постов</h1>
+//       {posts.map((p) => {
+//         return (
+//           <div key={p.id}>
+//             <b>title</b>: {p.title}
+//             <button style={{ marginLeft: "15px" }} onClick={() => deletePostHandler(p.id)}>
+//               x
+//             </button>
+//           </div>
+//         )
+//       })}
+//     </>
+//   )
+// }
+// createRoot(document.getElementById("root")!).render(<App />)
+
+// Правильный ответ: return instance.delete<{ message: string }>(`posts/${id}`)
