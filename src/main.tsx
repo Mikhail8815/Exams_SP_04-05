@@ -1,115 +1,81 @@
-import { useEffect } from "react"
-import { createRoot } from "react-dom/client"
-import { Provider, useDispatch, useSelector } from "react-redux"
-import axios from "axios"
-import { asyncThunkCreator, buildCreateSlice, configureStore } from "@reduxjs/toolkit"
-import { z } from "zod"
-// Types
-type Film = {
-  id: number
-  nameOriginal: string
-  description: string
-  ratingImdb: number
-}
-type FilmsResponse = {
-  total: number
-  messages: string[]
-  page: number
-  pageCount: number
-  data: Film[]
-}
-// ZOD schemas
-const filmSchema = z.object({
-  id: z.string(),
-  nameOriginal: z.string(),
-  description: z.string(),
-  ratingImdb: z.number(),
-})
-const filmsResponseSchema = z.object({
-  total: z.number().int().positive(),
-  messages: z.array(z.string()),
-  page: z.number().int().positive(),
-  pageCount: z.number().int().positive(),
-  data: filmSchema.array(),
-})
-// Api
-const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" })
-const api = {
-  getFilms() {
-    return instance.get<FilmsResponse>("films")
-  },
-}
-// Slice
-const createAppSlice = buildCreateSlice({ creators: { asyncThunk: asyncThunkCreator } })
-const slice = createAppSlice({
-  name: "films",
-  initialState: {
-    films: [] as Film[],
-  },
-  selectors: {
-    selectFilms: (state) => state.films,
-  },
-  reducers: (create) => ({
-    fetchFilms: create.asyncThunk(
-      async (_arg, { rejectWithValue }) => {
-        try {
-          const res = await api.getFilms()
-          filmsResponseSchema.parse(res.data) // 💎 ZOD
-          return { films: res.data.data }
-        } catch (error) {
-          if (error instanceof z.ZodError) {
-            alert("Zod error")
-            console.table(error.issues)
-          }
-          return rejectWithValue(null)
-        }
-      },
-      {
-        fulfilled: (state, action) => {
-          state.films = action.payload.films
-        },
-      },
-    ),
-  }),
-})
-const filmsReducer = slice.reducer
-const { fetchFilms } = slice.actions
-const { selectFilms } = slice.selectors
-// App
-const App = () => {
-  const dispatch = useAppDispatch()
-  const films = useAppSelector(selectFilms)
-  useEffect(() => {
-    dispatch(fetchFilms())
-  }, [])
-  return (
-    <>
-      <h2>🎦 Films</h2>
-      {films.map((film) => {
-        return (
-          <div key={film.id}>
-            <b>{film.nameOriginal}</b>
-            <p>{film.description}</p>
-            <p>⭐ {film.ratingImdb} </p>
-          </div>
-        )
-      })}
-    </>
-  )
-}
-// Store
-const store = configureStore({
-  reducer: {
-    [slice.name]: filmsReducer,
-  },
-})
-type RootState = ReturnType<typeof store.getState>
-type AppDispatch = typeof store.dispatch
-const useAppDispatch = useDispatch.withTypes<AppDispatch>()
-const useAppSelector = useSelector.withTypes<RootState>()
-createRoot(document.getElementById("root")!).render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-)
-ыввцав
+import { configureStore, createSlice } from "@reduxjs/toolkit"
+   import { createRoot } from "react-dom/client"
+   import { Provider, useDispatch, useSelector } from "react-redux"
+   type Product = {
+     id: number
+     name: string
+     inStock: boolean
+   }
+   // slice
+   const slice = createSlice({
+     name: "products",
+     initialState: [
+       { id: 1, name: "Laptop", inStock: true },
+       { id: 2, name: "Headphones", inStock: false },
+       { id: 3, name: "Smartphone", inStock: true },
+     ] as Product[],
+     reducers: {
+       toggleInStock: (state, action) => {
+         const product = state.find((product) => product.id === action.payload.id)
+         if (product) {
+           product.inStock = action.payload.inStock
+         }
+       },
+       clearStock: (state) => {
+         return []
+       },
+     },
+     selectors: {
+       selectProducts: (state) => state,
+     },
+   })
+   const { toggleInStock, clearStock } = slice.actions
+   const { selectProducts } = slice.selectors
+   // App.tsx
+   const App = () => {
+     const products = useAppSelector(selectProducts)
+     const dispatch = useAppDispatch()
+     const handleLogout = () => {
+       dispatch(clearStock())
+     }
+     const toggleProductStock = (product: Product) => {
+       dispatch(toggleInStock({ id: product.id, inStock: !product.inStock }))
+     }
+     return (
+       <div>
+         <button onClick={handleLogout}>Logout</button>
+         <ul>
+           {products.map((product) => (
+             <li key={product.id}>
+               <span
+                 style={{
+                   color: product.inStock ? "green" : "red",
+                 }}
+               >
+                 {product.name} ({product.inStock ? "In Stock" : "Out of Stock"})
+               </span>
+               <button onClick={() => toggleProductStock(product)}>
+                 {product.inStock ? "Mark Out of Stock" : "Mark In Stock"}
+               </button>
+             </li>
+           ))}
+         </ul>
+       </div>
+     )
+   }
+   // store.ts
+   const store = configureStore({
+     reducer: {
+       products: slice.reducer,
+     },
+   })
+   type RootState = ReturnType<typeof store.getState>
+   type AppDispatch = typeof store.dispatch
+   const useAppDispatch = useDispatch.withTypes<AppDispatch>()
+   const useAppSelector = useSelector.withTypes<RootState>()
+   // main.ts
+   createRoot(document.getElementById("root")!).render(
+     <Provider store={store}>
+       <App />
+     </Provider>,
+   )
