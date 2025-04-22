@@ -254,6 +254,21 @@
    }
    createRoot(document.getElementById("root")!).render(<Login />)
 
+   Ответ: 
+
+    .min(1, { message: "Username is required" })
+    .min(3, { message: "Username must be at least 3 characters" })
+    .max(20, { message: "Username must contain at most 20 characters" }) 
+    .regex(/^[a-zA-Z]+$/, { message: "Only latin letters allowed" }), 
+    
+
+
+    А лучше так: 
+
+    .min(1, "Username is required")
+    .min(3, "Username must be at least 3 characters")
+    .max(20, "Username must contain at most 20 characters" ) 
+    .regex(/^[a-zA-Z]+$/, "Only latin letters allowed" ), 
 
                                              Задача №3
 
@@ -346,6 +361,17 @@
      <App />
    </Provider>,
  )
+
+
+ Ответ:
+
+ const note = state.items.find(note => note.id === action.payload.id)
+  if (note) {
+    note.important = action.payload.important
+  }
+  return state
+
+  Ответил неправильно. return state не обязательно писать
 
 
 
@@ -474,6 +500,24 @@
     </BrowserRouter>,
   )
 
+
+  Ответы: 
+
+  Основной
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/profile')
+    }
+  }, [isLoggedIn])
+
+  Второй вариант
+
+
+    if (isLoggedIn) {
+    return <Navigate to={"profile"} />
+  }
+
                                            Задача №5
 
    import { asyncThunkCreator, buildCreateSlice, configureStore } from "@reduxjs/toolkit"
@@ -585,6 +629,15 @@
    )
 
 
+   Ответ:
+
+   Предположительно правильный 
+   6 → 8 → 7 → 2 → 1 → 3 → 4 → 5.
+   В итоге правильный
+
+   6 8 5 7 2 1 3 4
+
+
                                                  Задача №6
 
    Вопрос:
@@ -653,6 +706,11 @@
        <App />
      </Provider>,
    )
+
+
+   правильный ответ:
+
+    console.log(current(state))
 
 
                                             Задача №7
@@ -749,3 +807,8 @@
        <App />
      </Provider>,
    )
+
+
+Правильный ответ:
+
+return []

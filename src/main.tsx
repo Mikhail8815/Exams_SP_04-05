@@ -1,114 +1,93 @@
-import { useEffect } from "react"
+import { configureStore, createSlice } from "@reduxjs/toolkit"
 import { createRoot } from "react-dom/client"
 import { Provider, useDispatch, useSelector } from "react-redux"
-import axios from "axios"
-import { asyncThunkCreator, buildCreateSlice, configureStore } from "@reduxjs/toolkit"
-import { z } from "zod"
-// Types
-type Film = {
+
+type Note = {
   id: number
-  nameOriginal: string
-  description: string
-  ratingImdb: number
+  content: string
+  important: boolean
 }
-type FilmsResponse = {
-  total: number
-  messages: string[]
-  page: number
-  pageCount: number
-  data: Film[]
-}
-// ZOD schemas
-const filmSchema = z.object({
-  id: z.string(),
-  nameOriginal: z.string(),
-  description: z.string(),
-  ratingImdb: z.number(),
-})
-const filmsResponseSchema = z.object({
-  total: z.number().int().positive(),
-  messages: z.array(z.string()),
-  page: z.number().int().positive(),
-  pageCount: z.number().int().positive(),
-  data: filmSchema.array(),
-})
-// Api
-const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" })
-const api = {
-  getFilms() {
-    return instance.get<FilmsResponse>("films")
-  },
-}
-// Slice
-const createAppSlice = buildCreateSlice({ creators: { asyncThunk: asyncThunkCreator } })
-const slice = createAppSlice({
-  name: "films",
+
+// slice
+const slice = createSlice({
+  name: "notes",
   initialState: {
-    films: [] as Film[],
+    items: [
+      { id: 1, content: "Buy groceries", important: false },
+      { id: 2, content: "Schedule meeting", important: true },
+      { id: 3, content: "Call mom", important: false },
+    ],
+  },
+  reducers: {
+    updateNote: (state, action) => {
+      const note = state.items.find((note) => note.id === action.payload.id)
+      if (note) {
+        note.important = action.payload.important
+      }
+      return state
+    },
   },
   selectors: {
-    selectFilms: (state) => state.films,
+    selectNotes: (state) => state.items,
   },
-  reducers: (create) => ({
-    fetchFilms: create.asyncThunk(
-      async (_arg, { rejectWithValue }) => {
-        try {
-          const res = await api.getFilms()
-          filmsResponseSchema.parse(res.data) // 💎 ZOD
-          return { films: res.data.data }
-        } catch (error) {
-          if (error instanceof z.ZodError) {
-            alert("Zod error")
-            console.table(error.issues)
-          }
-          return rejectWithValue(null)
-        }
-      },
-      {
-        fulfilled: (state, action) => {
-          state.films = action.payload.films
-        },
-      },
-    ),
-  }),
 })
-const filmsReducer = slice.reducer
-const { fetchFilms } = slice.actions
-const { selectFilms } = slice.selectors
-// App
+
+const { updateNote } = slice.actions
+const { selectNotes } = slice.selectors
+
+// App.tsx
 const App = () => {
+  const notes = useAppSelector(selectNotes)
   const dispatch = useAppDispatch()
-  const films = useAppSelector(selectFilms)
-  useEffect(() => {
-    dispatch(fetchFilms())
-  }, [])
+
+  const toggleImportance = (note: Note) => {
+    dispatch(updateNote({ id: note.id, important: !note.important }))
+  }
+
   return (
-    <>
-      <h2>🎦 Films</h2>
-      {films.map((film) => {
-        return (
-          <div key={film.id}>
-            <b>{film.nameOriginal}</b>
-            <p>{film.description}</p>
-            <p>⭐ {film.ratingImdb} </p>
-          </div>
-        )
-      })}
-    </>
+    <ul>
+      {notes.map((note) => (
+        <li key={note.id}>
+          <span
+            style={{
+              fontWeight: note.important ? "bold" : "normal",
+            }}
+          >
+            {note.content}
+          </span>
+          <button onClick={() => toggleImportance(note)}>{note.important ? "Unmark" : "Mark Important"}</button>
+        </li>
+      ))}
+    </ul>
   )
 }
-// Store
+
+// store.ts
 const store = configureStore({
   reducer: {
-    [slice.name]: filmsReducer,
+    notes: slice.reducer,
   },
 })
+
 type RootState = ReturnType<typeof store.getState>
 type AppDispatch = typeof store.dispatch
 const useAppDispatch = useDispatch.withTypes<AppDispatch>()
 const useAppSelector = useSelector.withTypes<RootState>()
+
+// main.ts
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <App />
   </Provider>,
 )
+
+// 📜 Описание:
+// При нажатии на кнопку Mark Important или Unmark рядом с заметкой, важность заметки не обновляется 🥲
+
+// 🪛 Задача:
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Mark Important или Unmark,
+// состояние важности заметки обновлялось.
+// В качестве ответа укажите исправленный код написанный вместо return state.
+// ❗Изменение стейта должно быть написано мутабельным образом
+// ❗Не используйте деструктуризацию action.payload (const {id} = action.payload)
+// ❗Не создавайте переменные из action.payload (const id = action.payload.id)
