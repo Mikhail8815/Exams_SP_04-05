@@ -79,6 +79,14 @@ createRoot(document.getElementById("root")!).render(
 )
 
 
+ОТВЕТ: removePost: builder.mutation<{ message: string }, string>({
+  query: (id) => ({
+    url: `posts/${id}`,
+    method: 'DELETE',
+  }),
+})
+
+
 
 
 
@@ -119,6 +127,10 @@ createRoot(document.getElementById("root")!).render(
  createRoot(document.getElementById("root")!).render(<App />)
 
 
+  ОТВЕТ: 2
+
+
+
 
 
 
@@ -148,6 +160,9 @@ export const App = () => {
   )
 }
 createRoot(document.getElementById("root")!).render(<App />)
+
+
+ОТВЕТ: git stash
 
 
 
@@ -225,6 +240,8 @@ createRoot(document.getElementById("root")!).render(<App />)
  )
 
 
+ ОТВЕТ: const [trigger, { data }] = useLazyGetPhotosQuery()
+
 
 
                                                      Задача №5
@@ -294,6 +311,10 @@ createRoot(document.getElementById("root")!).render(<App />)
       <App />
     </Provider>,
   )
+
+  ОТВЕТ: getComments: builder.query<Comment[], void>({
+            query: () => "/comments"
+          })
 
 
 
@@ -383,6 +404,9 @@ createRoot(document.getElementById("root")!).render(<App />)
   );
 
 
+  ОТВЕТ: tagTypes: ["Title"], providesTags: ["Title"], invalidatesTags: ["Title"],
+
+
 
 
                                                      Задача №7
@@ -469,6 +493,9 @@ createRoot(document.getElementById("root")!).render(
 )
 
 
+ОТВЕТ: transformResponse: (response: Response): Product[] => response.data
+
+
 
 
 
@@ -550,3 +577,12 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </Provider>,
 )
+
+
+ОТВЕТ: addComment: builder.mutation<Comment, { body: string }>({
+               query: (body) => ({
+                 url: 'comments',
+                 method: 'POST',
+                 body: { body }
+               }),
+             })
