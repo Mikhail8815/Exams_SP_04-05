@@ -1,81 +1,52 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit"
-   import { createRoot } from "react-dom/client"
-   import { Provider, useDispatch, useSelector } from "react-redux"
-   type Product = {
-     id: number
-     name: string
-     inStock: boolean
-   }
-   // slice
-   const slice = createSlice({
-     name: "products",
-     initialState: [
-       { id: 1, name: "Laptop", inStock: true },
-       { id: 2, name: "Headphones", inStock: false },
-       { id: 3, name: "Smartphone", inStock: true },
-     ] as Product[],
-     reducers: {
-       toggleInStock: (state, action) => {
-         const product = state.find((product) => product.id === action.payload.id)
-         if (product) {
-           product.inStock = action.payload.inStock
-         }
-       },
-       clearStock: (state) => {
-         return []
-       },
-     },
-     selectors: {
-       selectProducts: (state) => state,
-     },
-   })
-   const { toggleInStock, clearStock } = slice.actions
-   const { selectProducts } = slice.selectors
-   // App.tsx
-   const App = () => {
-     const products = useAppSelector(selectProducts)
-     const dispatch = useAppDispatch()
-     const handleLogout = () => {
-       dispatch(clearStock())
-     }
-     const toggleProductStock = (product: Product) => {
-       dispatch(toggleInStock({ id: product.id, inStock: !product.inStock }))
-     }
-     return (
-       <div>
-         <button onClick={handleLogout}>Logout</button>
-         <ul>
-           {products.map((product) => (
-             <li key={product.id}>
-               <span
-                 style={{
-                   color: product.inStock ? "green" : "red",
-                 }}
-               >
-                 {product.name} ({product.inStock ? "In Stock" : "Out of Stock"})
-               </span>
-               <button onClick={() => toggleProductStock(product)}>
-                 {product.inStock ? "Mark Out of Stock" : "Mark In Stock"}
-               </button>
-             </li>
-           ))}
-         </ul>
-       </div>
-     )
-   }
-   // store.ts
-   const store = configureStore({
-     reducer: {
-       products: slice.reducer,
-     },
-   })
-   type RootState = ReturnType<typeof store.getState>
-   type AppDispatch = typeof store.dispatch
-   const useAppDispatch = useDispatch.withTypes<AppDispatch>()
-   const useAppSelector = useSelector.withTypes<RootState>()
-   // main.ts
-   createRoot(document.getElementById("root")!).render(
-     <Provider store={store}>
-       <App />
-     </Provider>,
-   )
+import { configureStore } from "@reduxjs/toolkit"
+  import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+  import { createRoot } from "react-dom/client"
+  import { Provider } from "react-redux"
+  type Comment = {
+    postId: string
+    id: string
+    name: string
+    email: string
+    body: string
+  }
+  // Api
+  const api = createApi({
+    reducerPath: "commentsApi",
+    baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
+    endpoints: (builder) => {
+      return {
+        getComments: builder.query<Comment[], void>({
+          query: () => "/comments"
+        })
+        // ❗❗❗XXX❗❗❗
+      }
+    },
+  })
+  const { useGetCommentsQuery } = api
+  // App.tsx
+  const App = () => {
+    const { data } = useGetCommentsQuery()
+    return (
+      <>
+        {data?.map((el) => {
+          return (
+            <div key={el.id} style={{ border: "1px solid", margin: "5px", padding: "5px" }}>
+              <p>body - {el.body}</p>
+            </div>
+          )
+        })}
+      </>
+    )
+  }
+  // store.ts
+  const store = configureStore({
+    reducer: {
+      [api.reducerPath]: api.reducer,
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
+  })
+  createRoot(document.getElementById("root")!).render(
+    <Provider store={store}>
+      <App />
+    </Provider>,
+  )
