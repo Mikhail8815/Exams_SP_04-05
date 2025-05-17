@@ -37,6 +37,7 @@ const appSlice = createSlice({
     builder
       .addMatcher(isPending, (state, action) => {
         // "❗X"
+        
         state.status = "loading"
       })
       .addMatcher(isFulfilled, (state) => {
@@ -165,6 +166,12 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </Provider>,
 )
+
+ОТВЕТ:  if (
+        api.endpoints.getPosts.matchPending(action) 
+      ) {
+        return
+      }
 
 
 
@@ -324,6 +331,9 @@ createRoot(document.getElementById("root")!).render(
 )
 
 
+ОТВЕТ: (result.error.data as Error).errors[0].message
+
+
                                                          Задача №3
 
 Вопрос:
@@ -416,6 +426,8 @@ createRoot(document.getElementById("root")!).render(
   </Provider>,
 )
 
+ОТВЕТ: data.isLoading data.isSuccess data.isError
+
 
 
                                                          Задача №4
@@ -507,6 +519,57 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </Provider>,
 )
+
+ОТВЕТ: 1 Вариант (наверное этот, так как такой способ в методичке)
+    builder
+    .addMatcher(isPending, (state) => {
+      state.notification = "loading"
+    })
+    .addMatcher(isFulfilled, (state) => {
+      state.notification = "success"
+    })
+    .addMatcher(isRejected, (state) => {
+      state.notification = "error"
+    })
+
+    // 2 Вариант (Или этот, он тоже есть в методичке)
+    builder
+      .addMatcher(
+        (action) => {
+          return action.type.endsWith("/pending")
+        },
+        (state) => {
+          state.notification = "loading"
+        },
+      )
+      .addMatcher(
+        (action) => {
+          return action.type.endsWith("/fulfilled")
+        },
+        (state) => {
+          state.notification = "success"
+        },
+      )
+      .addMatcher(
+        (action) => {
+          return action.type.endsWith("/rejected")
+        },
+        (state) => {
+          state.notification = "error"
+        },
+      )
+
+    // 3 Вариант  (Хотя, этот самый лучший по коду)
+
+    builder.addMatcher(api.endpoints.getPhotos.matchPending, (state) => {
+      state.notification = "loading"
+    })
+    builder.addMatcher(api.endpoints.getPhotos.matchFulfilled, (state) => {
+      state.notification = "success"
+    })
+    builder.addMatcher(api.endpoints.getPhotos.matchRejected, (state) => {
+      state.notification = "error"
+    })
 
 
 
@@ -606,6 +669,7 @@ createRoot(document.getElementById("root")!).render(
   </Provider>,
 )
 
+ОТВЕТ: .unwrap()
 
 
 
@@ -651,7 +715,7 @@ export const App = () => {
 createRoot(document.getElementById("root")!).render(<App />)
 
 
-
+ОТВЕТ: 1 3
 
 
 
@@ -795,7 +859,7 @@ createRoot(document.getElementById("root")!).render(
 
 
 
-
+ОТВЕТ: dispatch(api.util.resetApiState())
 
 
 
@@ -880,10 +944,14 @@ createRoot(document.getElementById("root")!).render(
 )
 
 
-
-
-
-
+ОТВЕТ: dispatch(
+             api.util.updateQueryData("getUsers", undefined, (state) => {
+               const user = state.items.find((user) => user.id === id)
+               if (user) {
+                 user.name += smile
+               }
+             }),
+           )
 
 
 
@@ -932,3 +1000,6 @@ createRoot(document.getElementById("root")!).render(
    )
  }
  createRoot(document.getElementById("root")!).render(<App />)
+
+
+ОТВЕТ: 1 2 3
