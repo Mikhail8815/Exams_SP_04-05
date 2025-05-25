@@ -1,166 +1,145 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit"
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-import { useEffect } from "react"
-import { createRoot } from "react-dom/client"
-import { Provider, useDispatch, useSelector } from "react-redux"
-
-// Slice
-const appSlice = createSlice({
-  name: "app",
-  initialState: {
-    error: null as string | null,
-  },
-  reducers: (create) => ({
-    setError: create.reducer<{ error: string | null }>((state, action) => {
-      state.error = action.payload.error
-    }),
-  }),
-  selectors: {
-    selectError: (state) => state.error,
-  },
-})
-
-const { selectError } = appSlice.selectors
-const { setError } = appSlice.actions
-
-// Api
+import { configureStore } from "@reduxjs/toolkit";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { Provider, useDispatch } from "react-redux";
+import { BrowserRouter, NavLink, Route, Routes } from "react-router";
+type Product = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+};
+type ProductsResponse = {
+  total: number;
+  messages: string[];
+  page: number;
+  pageCount: number;
+  data: Product[];
+};
+type Film = {
+  id: number;
+  nameOriginal: string;
+  description: string;
+  ratingImdb: number;
+};
+type FilmsResponse = {
+  total: number;
+  messages: string[];
+  page: number;
+  pageCount: number;
+  data: Film[];
+};
 type Post = {
-  body: string
-  id: string
-  title: string
-  userId: string
-}
-
-type Error = {
-  errors: { field: string; message: string }[]
-}
-
+  body: string;
+  id: string;
+  title: string;
+  userId: string;
+};
+// Api
 const api = createApi({
   reducerPath: "api",
-  baseQuery: async (args, api, extraOptions) => {
-    const result = await fetchBaseQuery({
-      baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/",
-    })(args, api, extraOptions)
-
-    if (result.error) {
-      if (result.error.status === 400) {
-        const error = (result.error.data as Error).errors[0].message
-        api.dispatch(setError({ error }))
-      }
-    }
-    return result
-  },
-  tagTypes: ["Post"],
-  endpoints: (builder) => ({
-    getPosts: builder.query<Post[], void>({
-      query: () => "posts",
-      providesTags: ["Post"],
-    }),
-    removePost: builder.mutation<{ message: string }, string>({
-      query: (id) => ({
-        method: "DELETE",
-        url: `posts/${id}?delay=20`,
+  baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
+  tagTypes: ["Film", "Product", "Post"],
+  endpoints: (builder) => {
+    return {
+      getFilms: builder.query<FilmsResponse, void>({
+        query: () => "films",
+        providesTags: ["Film"],
       }),
-      invalidatesTags: ["Post"],
-    }),
-  }),
-})
-
-const { useGetPostsQuery, useRemovePostMutation } = api
-
-// UI
-const Header = () => <div style={{ width: "100%", background: "gray", border: "none", height: "50px" }}>header</div>
-
-const LinearProgress = () => (
-  <hr
-    style={{
-      height: "10px",
-      width: "100%",
-      background: "lightblue",
-      border: "none",
-      position: "absolute",
-      left: "0px",
-      top: "50px",
-      right: "0px",
-    }}
-  />
-)
-
-const App = () => {
-  const error = useSelector(selectError)
-
-  const dispatch = useDispatch()
-
-  useEffect(() => {
-    setTimeout(() => {
-      dispatch(setError({ error: null }))
-    }, 4000)
-  }, [error])
-
-  return (
-    <>
-      <Header />
-      {error && <h1 style={{ color: "red" }}>{error}</h1>}
-      <Posts />
-    </>
-  )
-}
-
-const Posts = () => {
-  const { data, isSuccess, isLoading: isPostsLoading } = useGetPostsQuery()
-  const [removePost, { isLoading: isRemovePostLoading }] = useRemovePostMutation()
-
-  const deletePostHandler = (id: string) => {
-    removePost(id)
-  }
-
-  if (isPostsLoading || isRemovePostLoading) {
-    return <LinearProgress />
-  }
-
-  return (
-    <>
-      {isSuccess && (
-        <>
-          <h2>Posts</h2>
-          {data?.map((el) => {
-            return (
-              <div key={el.id} style={{ display: "flex", alignItems: "center" }}>
-                <div style={{ border: "1px solid", margin: "5px", padding: "5px", width: "200px" }}>
-                  <p>
-                    <b>title</b> - {el.title}
-                  </p>
-                </div>
-                <button onClick={() => deletePostHandler(el.id)}>Delete post</button>
-              </div>
-            )
-          })}
-        </>
-      )}
-    </>
-  )
-}
-
-// Store
-const store = configureStore({
-  reducer: {
-    [appSlice.name]: appSlice.reducer,
-    [api.reducerPath]: api.reducer,
+      getProducts: builder.query<ProductsResponse, void>({
+        query: () => "products",
+        providesTags: ["Product"],
+      }),
+      getPosts: builder.query<Post[], void>({
+        query: () => "posts",
+        providesTags: ["Post"],
+      }),
+    };
   },
+});
+const { useGetFilmsQuery, useGetProductsQuery, useGetPostsQuery } = api;
+// Films.tsx
+const Films = () => {
+  const { data } = useGetFilmsQuery();
+  return (
+    <>
+      <h1>Films</h1>
+      {data?.data.map((el) => (
+        <div key={el.id} style={{ margin: "15px" }}>
+          movie title - <b>{el.nameOriginal}</b>
+        </div>
+      ))}
+    </>
+  );
+};
+const Products = () => {
+  const { data } = useGetProductsQuery();
+  return (
+    <>
+      <h1>Products</h1>
+      {data?.data.map((el) => (
+        <div key={el.id} style={{ margin: "15px" }}>
+          title - <b>{el.title}</b>
+        </div>
+      ))}
+    </>
+  );
+};
+const Posts = () => {
+  const { data } = useGetPostsQuery();
+  const dispatch = useDispatch();
+  const clearCacheHandler = () => {
+    dispatch(api.util.invalidateTags(['Film', 'Product']))
+    // ❗❗❗XXX❗❗❗
+  };
+  return (
+    <>
+      <h1>Posts</h1>
+      <button onClick={clearCacheHandler}>I clear cache. Mu-ha-ha 👺</button>
+      {data?.map((el) => (
+        <div key={el.id} style={{ margin: "15px" }}>
+          title - <b>{el.title}</b>
+        </div>
+      ))}
+    </>
+  );
+};
+export const App = () => {
+  return (
+    <>
+      <header style={{ display: "flex", alignItems: "center", gap: "10px", border: "1px solid" }}>
+        <ul>
+          Menu:
+          <li>
+            <NavLink to={"films"}>Films</NavLink>
+          </li>
+          <li>
+            <NavLink to={"products"}>Products</NavLink>
+          </li>
+          <li>
+            <NavLink to={"posts"}>Posts</NavLink>
+          </li>
+        </ul>
+      </header>
+      <Routes>
+        <Route path={"/"} element={<h1>Home page</h1>} />
+        <Route path={"/films"} element={<Films />} />
+        <Route path={"/products"} element={<Products />} />
+        <Route path={"/posts"} element={<Posts />} />
+      </Routes>
+    </>
+  );
+};
+// store.ts
+const store = configureStore({
+  reducer: { [api.reducerPath]: api.reducer },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
-})
-
+});
 createRoot(document.getElementById("root")!).render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-)
-
-// 📜 Описание:
-// Нажмите на кнопку удаления поста. Пост не удалится.
-
-// 🪛 Задача:
-// Ваша задача состоит в том, что разобраться почему пост не удаляется и вывести сообщение
-// об ошибке на экран.
-// Что нужно написать вместо "❗X" для того, чтобы при удалении поста он увидел ошибку
-// ❗ Для типизации ошибки используйте type assertion с типом Error
+  <BrowserRouter>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </BrowserRouter>,
+);

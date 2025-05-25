@@ -109,6 +109,18 @@ createRoot(document.getElementById("root")!).render(
 )
 
 
+ОТВЕТ:   getUsers: builder.query<UserResponse, { pageSize: number; pageNumber: number }>({
+             query: (params) => ({
+               url: `users`,
+               params: {
+                 pageSize: params.pageSize,
+                 pageNumber: params.pageNumber,
+               }
+             }),
+           }),
+
+           НЕПРАВЛЬНО
+
                                                           Задача №2
 
 Вопрос:
@@ -155,7 +167,7 @@ export const App = () => {
 }
 createRoot(document.getElementById("root")!).render(<App />)
 
-
+ОТВЕТ: 2
 
 
                                                           Задача №3
@@ -234,6 +246,18 @@ createRoot(document.getElementById("root")!).render(
   </Provider>,
 );
 
+ОТВЕТ:  let timerId: number
+           if (isSuccess) {
+             setShowSuccessMessage(true);
+              timerId =  window.setInterval(() => {
+                  setShowSuccessMessage(false);
+            }, 2000)
+           }
+           return () => {
+             clearTimeout(timerId);
+           }
+
+           НЕПРАВЛЬНО
 
                                                           Задача №4
 
@@ -317,6 +341,10 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </Provider>,
 )
+
+ОТВЕТ: transformResponse: (response: Comment[]) => {
+               return response.reverse();
+             },
 
 
 
@@ -416,6 +444,8 @@ createRoot(document.getElementById("root")!).render(
   </Provider>,
 )
 
+ОТВЕТ: await queryFulfilled patchResult.undo()
+
 
 
                                                           Задача №6
@@ -504,6 +534,8 @@ createRoot(document.getElementById("root")!).render(
   </Provider>,
 )
 
+ОТВЕТ: setupListeners(store.dispatch)
+
 
 
 
@@ -543,5 +575,7 @@ export const App = () => {
   )
 }
 createRoot(document.getElementById("root")!).render(<App />)
+
+ОТВЕТ: 1 2 (непральный)
 
 
