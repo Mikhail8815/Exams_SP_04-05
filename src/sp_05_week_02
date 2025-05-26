@@ -85,6 +85,8 @@ createRoot(document.getElementById("root")!).render(
   }),
 })
 
+=======
+
 
 
 
@@ -126,6 +128,7 @@ createRoot(document.getElementById("root")!).render(
  createRoot(document.getElementById("root")!).render(<App />)
 
 
+
  ОТВЕТ: 2
 
 
@@ -162,7 +165,6 @@ createRoot(document.getElementById("root")!).render(<App />)
 
 
 ОТВЕТ: git stash
-
                                                      Задача №4
 
  Вопрос:
