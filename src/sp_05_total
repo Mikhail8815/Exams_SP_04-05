@@ -1,0 +1,194 @@
+                                                Задача №1
+
+Вопрос:
+
+При загрузке приложения отрисовывается таблица с пользователями.
+
+Нажмите на Name или Age и вы увидите как идет запрос на сервер.
+
+При нажатии на Age пользователи должны сортироваться по возрасту, а при нажатии на Name по имени
+
+Однако из-за того, что код getUsers написан неверно данные в таблицы не сортируются.
+
+Перепишите getUsers таким образом, чтобы пагинация сортировка отрабатывала верно
+
+❗Типизацию указывать обязательно
+
+❗Очередность применения query параметров.
+
+Первым: sortDirection, вторым sortBy.
+
+Это касается и типизации и все остальных участках кода, если вам понадобится доставать эти параметры
+
+Пример ответа
+
+getUsers: builder.query<{ sortDirection: any; sortBy: any >({
+
+query: () => {
+
+return {
+
+url: `users`,
+
+}
+
+},
+
+}),
+
+
+
+import { createRoot } from "react-dom/client"
+import React, { useState } from "react"
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+import { configureStore } from "@reduxjs/toolkit"
+import { Provider } from "react-redux"
+// Styles
+const table: React.CSSProperties = {
+  borderCollapse: "collapse",
+  width: "100%",
+  tableLayout: "fixed",
+}
+const th: React.CSSProperties = {
+  padding: "10px",
+  border: "1px solid black",
+  background: "lightgray",
+  cursor: "pointer",
+}
+const td: React.CSSProperties = {
+  padding: "10px",
+  border: "1px solid black",
+}
+// Api
+type User = {
+  id: number
+  name: string
+  age: number
+}
+type UserResponse = {
+  totalCount: number
+  items: User[]
+}
+type SortDirection = "asc" | "desc" | null
+type SortBy = "name" | "age" | null
+const api = createApi({
+  reducerPath: "api",
+  baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
+  endpoints: (builder) => ({
+    getUsers: builder.query({
+      query: () => {
+        return {
+          url: `users`,
+        }
+      },
+    }),
+  }),
+})
+const { useGetUsersQuery } = api
+// App
+export const App = () => {
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
+  const [sortBy, setSortBy] = useState<SortBy>("age")
+  const { data } = useGetUsersQuery({ sortDirection, sortBy })
+  const sortHandler = (name: "name" | "age") => {
+    const direction = sortDirection === "asc" ? "desc" : "asc"
+    setSortDirection(direction)
+    setSortBy(name)
+  }
+  return (
+    <>
+      <h1>👪 Список пользователей</h1>
+      <table style={table}>
+        <thead>
+          <tr>
+            <th style={th} onClick={() => sortHandler("name")}>
+              Name
+            </th>
+            <th style={th} onClick={() => sortHandler("age")}>
+              Age
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {data?.items.map((user) => (
+            <tr key={user.id}>
+              <td style={td}>{user.name}</td>
+              <td style={td}>{user.age}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
+  )
+}
+// store.ts
+const store = configureStore({
+  reducer: { [api.reducerPath]: api.reducer },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
+})
+createRoot(document.getElementById("root")!).render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+)
+
+
+
+
+
+                                                Задача №2
+
+
+
+
+
+
+                                                Задача №3
+
+
+
+
+
+
+
+                                                Задача №4
+
+
+
+
+
+
+
+
+                                                Задача №5
+
+
+
+
+
+
+
+
+                                                Задача №6
+
+
+
+
+
+
+
+
+
+                                                Задача №7
+
+
+
+
+
+
+
+
+
+
+                                                Задача №8
+
